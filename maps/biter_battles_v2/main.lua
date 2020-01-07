@@ -1,5 +1,6 @@
 -- Biter Battles v2 -- by MewMew
 
+local Init = require "maps.biter_battles_v2.init"
 local Ai = require "maps.biter_battles_v2.ai"
 local BiterHealthBooster = require "modules.biter_health_booster"
 local Biters_landfill = require "maps.biter_battles_v2.biters_landfill"
@@ -7,7 +8,6 @@ local Chat = require "maps.biter_battles_v2.chat"
 local Combat_balance = require "maps.biter_battles_v2.combat_balance"
 local Game_over = require "maps.biter_battles_v2.game_over"
 local Gui = require "maps.biter_battles_v2.gui"
-local Init = require "maps.biter_battles_v2.init"
 local Map_info = require "maps.biter_battles_v2.map_info"
 local Mirror_terrain = require "maps.biter_battles_v2.mirror_terrain"
 local No_turret_creep = require "maps.biter_battles_v2.no_turret_creep"
@@ -21,7 +21,7 @@ require "modules.mineable_wreckage_yields_scrap"
 
 local function on_player_joined_game(event)
 	local surface = game.surfaces["biter_battles"]
-	local player = game.players[event.player_index]	
+	local player = game.players[event.player_index]
 
 	if player.online_time == 0 then
 		player.spectator = true
@@ -34,7 +34,7 @@ local function on_player_joined_game(event)
 		player.character.destructible = false
 		game.permissions.get_group("spectator").add_player(player)
 	end
-	
+
 	Map_info.player_joined_game(player)
 	Team_manager.draw_top_toggle_button(player)
 end
@@ -44,9 +44,9 @@ local function on_gui_click(event)
 	local element = event.element
 	if not element then return end
 	if not element.valid then return end
-	
+
 	if Map_info.gui_click(player, element) then return end
-	Team_manager.gui_click(event)	
+	Team_manager.gui_click(event)
 end
 
 local function on_research_finished(event)
@@ -75,16 +75,16 @@ end
 
 --Prevent Players from damaging Rocket Silos
 local function on_entity_damaged(event)
-	local entity = event.entity	
+	local entity = event.entity
 	if not entity.valid then return end
 	if entity.force.index > 5 then return end
-	
+
 	local cause = event.cause
 	if cause then
-		if cause.type == "unit" then return end		 
+		if cause.type == "unit" then return end
 	end
-	
-	if entity.name ~= "rocket-silo" then return end		
+
+	if entity.name ~= "rocket-silo" then return end
 	entity.health = entity.health + event.final_damage_amount
 end
 
@@ -97,9 +97,11 @@ local tick_minute_functions = {
 	[300 * 7] = Game_over.restart_idle_map,
 }
 
+global.profilers = {}
+
 local function on_tick(event)
 	Mirror_terrain()
-	
+
 	local tick = game.tick
 
 	if tick % 60 ~= 0 then return end
@@ -115,9 +117,27 @@ local function on_tick(event)
 		Game_over.server_restart()
 		return
 	end
-	
+
 	local key = tick % 3600
-	if tick_minute_functions[key] then tick_minute_functions[key]() end
+  if tick % 3600 == 0 then
+      log(serpent.block(defines.events))
+    for key, profiler in pairs(global.profilers) do
+      log(key)
+      log(profiler)
+    end
+    global.profilers = {}
+  end
+	if tick_minute_functions[key] then
+    if global.profilers == nil then
+      global.profilers = {}
+    end
+    game.print(key)
+    if global.profilers[key] == nil then
+      global.profilers[key] = game.create_profiler()
+    end
+    global.profilers[key].restart()
+    tick_minute_functions[key]() end
+    global.profilers[key].stop()
 end
 
 local function on_init()

@@ -37,8 +37,19 @@ else
 end
 
 local function on_event(event)
+    if global.profilers == nil then
+      global.profilers = {}
+    end
+    if global.profilers[event.name] == nil then
+      global.profilers[event.name] = game.create_profiler()
+    end
+
+    global.profilers[event.name].restart()
     local handlers = event_handlers[event.name]
     call_handlers(handlers, event)
+    if global.profilers[event.name] ~= nil then
+      global.profilers[event.name].stop()
+    end
 end
 
 local function on_init()
