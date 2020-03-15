@@ -37,7 +37,6 @@ local function show_force_crafting_queue(element, force)
   apply_header_style(force_label)
   force_label.style.horizontal_align = "center"
   force_label.style.width = constants["MAX_WIDTH"]
-  game.print(serpent.block(#element.children))
 
   local table = element.add { type = "table", name = "crafting_queue" .. force.name .. "_table", column_count = 1}
   for _, player in ipairs(force.connected_players) do
