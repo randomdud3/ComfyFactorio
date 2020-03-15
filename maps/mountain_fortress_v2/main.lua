@@ -2,6 +2,7 @@
 
  --enable / disable collapsing of the map
 local collapse_enabled = false
+local darkness = true
 
 require "player_modifiers"
 require "functions.soft_reset"
@@ -11,6 +12,7 @@ local RPG = require "modules.rpg"
 require "modules.wave_defense.main"
 require "modules.biters_yield_coins"
 require "modules.no_deconstruction_of_neutral_entities"
+require "modules.no_solar"
 require "modules.shotgun_buff"
 require "modules.explosives"
 require "modules.mineable_wreckage_yields_scrap"
@@ -42,6 +44,8 @@ local treasure_chest_messages = {
 local function set_difficulty()
 	local wave_defense_table = WD.get_table()
 	local player_count = #game.connected_players
+
+	wave_defense_table.max_active_biters = 1024
 
 	-- threat gain / wave
 	wave_defense_table.threat_gain_multiplier = 2 + player_count * 0.1
@@ -83,8 +87,14 @@ function Public.reset_map()
 	
 	local surface = game.surfaces[global.active_surface_index]
 
-	--surface.freeze_daytime = true
-	--surface.daytime = 0.5
+	if darkness then
+		surface.min_brightness = 0.10
+		surface.brightness_visual_weights = {0.90, 0.90, 0.90}
+		surface.daytime = 0.42
+		surface.freeze_daytime = true
+		surface.solar_power_multiplier = 999
+	end
+
 	surface.request_to_generate_chunks({0,0}, 2)
 	surface.force_generate_chunk_requests()
 	

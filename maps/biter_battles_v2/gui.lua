@@ -1,4 +1,5 @@
 local Public = {}
+local Server = require 'utils.server'
 
 local bb_config = require "maps.biter_battles_v2.config"
 local event = require 'utils.event'
@@ -296,7 +297,9 @@ function join_team(player, force_name, forced_join)
 		player.character.destructible = true
 		Public.refresh()
 		game.permissions.get_group("Default").add_player(player)
-		game.print("Team " .. player.force.name .. " player " .. player.name .. " is no longer spectating.", {r = 0.98, g = 0.66, b = 0.22})
+		local msg = table.concat({"Team ", player.force.name, " player ", player.name, " is no longer spectating."})
+		game.print(msg, {r = 0.98, g = 0.66, b = 0.22})
+		Server.to_discord_bold(msg)
 		player.spectator = false
 		return
 	end
@@ -309,7 +312,9 @@ function join_team(player, force_name, forced_join)
 	if not forced_join then
 		local c = player.force.name
 		if global.tm_custom_name[player.force.name] then c = global.tm_custom_name[player.force.name] end
-		game.print(player.name .. " has joined team " .. c .. "!", {r = 0.98, g = 0.66, b = 0.22})
+		local message = table.concat({player.name, " has joined team ", c, "!"})
+		game.print(message, {r = 0.98, g = 0.66, b = 0.22})
+		Server.to_discord_bold(message)
 	end
 	local i = player.get_inventory(defines.inventory.character_main)
 	i.clear()
@@ -332,7 +337,9 @@ function spectate(player, forced_join)
 	player.force = game.forces.spectator
 	player.character.destructible = false
 	if not forced_join then
-		game.print(player.name .. " is spectating.", {r = 0.98, g = 0.66, b = 0.22})
+		local msg = player.name .. " is spectating."
+		game.print(msg, {r = 0.98, g = 0.66, b = 0.22})
+		Server.to_discord_bold(msg)
 	end
 	game.permissions.get_group("spectator").add_player(player)
 	global.spectator_rejoin_delay[player.name] = game.tick
