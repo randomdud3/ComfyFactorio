@@ -66,4 +66,4 @@ local build_config_gui = (function (player, frame)
 	show_crafting_queues(frame)
 end)
 
-comfy_panel_tabs["Crafting queues"] = build_config_gui
+comfy_panel_tabs["Crafting"] = build_config_gui
