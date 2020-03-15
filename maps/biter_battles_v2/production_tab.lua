@@ -119,4 +119,4 @@ end)
 game.print(serpent.block(err))
 end)
 
-comfy_panel_tabs["Production Stats"] = build_config_gui
+comfy_panel_tabs["Production"] = build_config_gui
