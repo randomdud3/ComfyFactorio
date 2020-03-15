@@ -116,7 +116,6 @@ local build_config_gui = (function (player, frame)
   local status, err = pcall(function()
 	show_production_stats(frame)
 end)
-game.print(serpent.block(err))
 end)
 
 comfy_panel_tabs["Production"] = build_config_gui
